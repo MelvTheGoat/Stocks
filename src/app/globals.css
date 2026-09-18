@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/*
+ * The whole product is reading. Type and measure get the attention here;
+ * there is very little chrome by design.
+ */
+@theme {
+  --color-ink: #16181d;
+  --color-ink-soft: #4a4f5a;
+  --color-ink-faint: #767c88;
+  --color-page: #fbfaf7;
+  --color-panel: #ffffff;
+  --color-rule: #e3e0d8;
+  --color-accent: #0f5c4a;
+  --color-accent-soft: #e6f0ec;
+  --color-flag: #8a3324;
+  --color-flag-soft: #fbeeeb;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-ink: #ecebe7;
+    --color-ink-soft: #b4b2ab;
+    --color-ink-faint: #8a877f;
+    --color-page: #14151a;
+    --color-panel: #1c1e25;
+    --color-rule: #313442;
+    --color-accent: #6fc3aa;
+    --color-accent-soft: #17302a;
+    --color-flag: #e08b7a;
+    --color-flag-soft: #2c1c18;
+  }
+}
+
+body {
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reading column. Long prose sits at a measure that does not tire the eye. */
+.prose-measure {
+  max-width: 62ch;
+}
+
+.prose-measure p {
+  margin-bottom: 1.1rem;
+  line-height: 1.7;
+}
+
+.prose-measure p:last-child {
+  margin-bottom: 0;
+}

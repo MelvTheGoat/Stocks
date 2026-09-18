@@ -36,10 +36,22 @@ export type ChunkProvenance =
 export type Chunk = {
   /** Stable across rebuilds so citations in logs stay meaningful. */
   id: string;
+  /** What a reader sees when this chunk is quoted or cited. */
   text: string;
+  /**
+   * What the index sees. Defaults to `text`. Kept separate because retrieval
+   * sometimes wants extra matching surface — an explainer's answer is indexed
+   * alongside the question it was written to answer — and that scaffolding
+   * must not leak into a quoted answer.
+   */
+  searchText?: string;
   tier: Tier;
   provenance: ChunkProvenance;
 };
+
+export function indexedText(chunk: Chunk): string {
+  return chunk.searchText ?? chunk.text;
+}
 
 /** Human-readable citation label, e.g. "Dangote Refinery, section 4". */
 export function citationLabel(chunk: Chunk): string {

@@ -60,10 +60,25 @@ function extractiveAnswer(chunks: Chunk[]): Answer {
   };
 }
 
+/**
+ * Echoes the question back mid-sentence, so the leading capital has to go
+ * unless the word is a name the reader capitalised deliberately.
+ */
+function echoQuestion(question: string): string {
+  const trimmed = question.trim().replace(/[?.\s]+$/, "");
+  const [first, second] = [trimmed.slice(0, 1), trimmed.slice(1, 2)];
+
+  // A second capital means an acronym: "NGX" survives, "How" does not. A
+  // proper noun like "Dangote" gets lowercased, which is the cost of not
+  // shipping a dictionary for one sentence.
+  const isAcronym = second === second.toUpperCase() && /[A-Z]/.test(second);
+  return isAcronym ? trimmed : `${first.toLowerCase()}${trimmed.slice(1)}`;
+}
+
 function notInSources(question: string): Answer {
   return {
     kind: "not-in-sources",
-    text: `I don't have anything in my sources that answers that. What I can answer from is the basics library and the published company profiles, and neither covers ${question.trim().replace(/\?+$/, "")}. Rather than guess, I'd rather tell you I don't have it.`,
+    text: `I don't have anything in my sources that answers that. I answer from the basics library and the published company profiles, and neither of them covers ${echoQuestion(question)}. Rather than guess, I'd rather tell you I don't have it.`,
     citations: [],
   };
 }

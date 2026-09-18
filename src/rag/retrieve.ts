@@ -1,5 +1,5 @@
 import MiniSearch from "minisearch";
-import type { Chunk } from "@/rag/chunk";
+import { indexedText, type Chunk } from "@/rag/chunk";
 import { buildCorpus } from "@/rag/corpus";
 
 /**
@@ -91,6 +91,8 @@ function createIndex(corpus: Chunk[]): MiniSearch<Chunk> {
     fields: ["text"],
     storeFields: ["id"],
     idField: "id",
+    extractField: (chunk, field) =>
+      field === "text" ? indexedText(chunk) : String(chunk[field as keyof Chunk] ?? ""),
     tokenize,
     processTerm: normaliseTerm,
     searchOptions: {

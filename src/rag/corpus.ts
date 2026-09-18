@@ -27,9 +27,11 @@ function explainerChunks(explainer: Explainer): Chunk[] {
 
     chunks.push({
       id: chunkId(provenance),
-      // The question is prepended so retrieval matches a reader's phrasing
-      // against the phrasing the explainer was written to answer.
-      text: field === "short" ? `${explainer.question} ${text}` : text,
+      text,
+      // The question is added to the indexed text only, so retrieval matches a
+      // reader's phrasing against the phrasing the explainer was written to
+      // answer without that question appearing in a quoted answer.
+      searchText: field === "short" ? `${explainer.question} ${text}` : undefined,
       tier: 1,
       provenance,
     });

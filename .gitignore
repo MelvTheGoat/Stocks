@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Local run output. Results live on the "results" branch, not here.
+runs/output/
+*.duckdb
+*.duckdb.wal
+
+# The model response cache is large and goes to Hugging Face, not git.
+.cache/
+cache/
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/

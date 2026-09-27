@@ -1,0 +1,40 @@
+name: authorship
+
+# Keeps the repository free of assistant attribution: no tool names in the
+# files, and none in commit messages or author fields either. This is a check
+# rather than a habit so it cannot quietly lapse.
+
+on:
+  push:
+    branches-ignore:
+      - results
+      - ngx-data
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # This workflow file necessarily contains the words it searches for, so
+      # it excludes itself. Nothing else in the tree is exempt.
+      - name: No attribution strings in the files
+        run: |
+          if git grep -iEl 'claude|anthropic|co-authored-by|generated with' \
+               -- . ':!.github/workflows/authorship.yml'; then
+            echo "::error::the files listed above contain attribution strings"
+            exit 1
+          fi
+          echo "clean"
+
+      - name: No attribution in commit messages or authors
+        run: |
+          if git log --format='%an%n%ae%n%B' \
+               | grep -iE 'claude|anthropic|co-authored-by|generated with'; then
+            echo "::error::a commit message or author contains attribution strings"
+            exit 1
+          fi
+          echo "clean"

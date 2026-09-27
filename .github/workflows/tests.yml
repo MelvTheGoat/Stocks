@@ -1,0 +1,45 @@
+name: tests
+
+on:
+  push:
+    # The data and results branches hold logs and CSV files, not code. Running
+    # the test suite on every collector commit would just burn minutes.
+    branches-ignore:
+      - results
+      - ngx-data
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Needed by the commit message check below.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install -e .
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Tests
+        run: pytest -q
+
+      # The tests must pass with no network at all. If a test quietly starts
+      # calling a real service, it will fail here rather than on the day the
+      # service is down or rate-limited.
+      - name: Tests with no network
+        run: |
+          pip install pytest-socket
+          pytest -q --disable-socket --allow-unix-socket

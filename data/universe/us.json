@@ -1,0 +1,497 @@
+[
+  {
+    "cik": 320193,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "Apple Inc.",
+    "role": "company",
+    "ticker": "AAPL"
+  },
+  {
+    "cik": 789019,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "MICROSOFT CORP",
+    "role": "company",
+    "ticker": "MSFT"
+  },
+  {
+    "cik": 1045810,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "NVIDIA CORP",
+    "role": "company",
+    "ticker": "NVDA"
+  },
+  {
+    "cik": 1652044,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "Alphabet Inc.",
+    "role": "company",
+    "ticker": "GOOGL"
+  },
+  {
+    "cik": 1018724,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "AMAZON COM INC",
+    "role": "company",
+    "ticker": "AMZN"
+  },
+  {
+    "cik": 1326801,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "Meta Platforms, Inc.",
+    "role": "company",
+    "ticker": "META"
+  },
+  {
+    "cik": 1730168,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "Broadcom Inc.",
+    "role": "company",
+    "ticker": "AVGO"
+  },
+  {
+    "cik": 1341439,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "ORACLE CORP",
+    "role": "company",
+    "ticker": "ORCL"
+  },
+  {
+    "cik": 1108524,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "Salesforce, Inc.",
+    "role": "company",
+    "ticker": "CRM"
+  },
+  {
+    "cik": 796343,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "ADOBE INC.",
+    "role": "company",
+    "ticker": "ADBE"
+  },
+  {
+    "cik": 50863,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "INTEL CORP",
+    "role": "company",
+    "ticker": "INTC"
+  },
+  {
+    "cik": 858877,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "CISCO SYSTEMS, INC.",
+    "role": "company",
+    "ticker": "CSCO"
+  },
+  {
+    "cik": 2488,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "ADVANCED MICRO DEVICES INC",
+    "role": "company",
+    "ticker": "AMD"
+  },
+  {
+    "cik": 804328,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "QUALCOMM INC/DE",
+    "role": "company",
+    "ticker": "QCOM"
+  },
+  {
+    "cik": 97476,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "TEXAS INSTRUMENTS INC",
+    "role": "company",
+    "ticker": "TXN"
+  },
+  {
+    "cik": 51143,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "INTERNATIONAL BUSINESS MACHINES CORP",
+    "role": "company",
+    "ticker": "IBM"
+  },
+  {
+    "cik": 19617,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "JPMORGAN CHASE & CO",
+    "role": "company",
+    "ticker": "JPM"
+  },
+  {
+    "cik": 70858,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "BANK OF AMERICA CORP /DE/",
+    "role": "company",
+    "ticker": "BAC"
+  },
+  {
+    "cik": 72971,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "WELLS FARGO & COMPANY/MN",
+    "role": "company",
+    "ticker": "WFC"
+  },
+  {
+    "cik": 886982,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "GOLDMAN SACHS GROUP INC",
+    "role": "company",
+    "ticker": "GS"
+  },
+  {
+    "cik": 895421,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "MORGAN STANLEY",
+    "role": "company",
+    "ticker": "MS"
+  },
+  {
+    "cik": 4962,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "AMERICAN EXPRESS CO",
+    "role": "company",
+    "ticker": "AXP"
+  },
+  {
+    "cik": 2012383,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "BlackRock, Inc.",
+    "role": "company",
+    "ticker": "BLK"
+  },
+  {
+    "cik": 316709,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "SCHWAB CHARLES CORP",
+    "role": "company",
+    "ticker": "SCHW"
+  },
+  {
+    "cik": 200406,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "JOHNSON & JOHNSON",
+    "role": "company",
+    "ticker": "JNJ"
+  },
+  {
+    "cik": 731766,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "UNITEDHEALTH GROUP INC",
+    "role": "company",
+    "ticker": "UNH"
+  },
+  {
+    "cik": 59478,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "ELI LILLY & Co",
+    "role": "company",
+    "ticker": "LLY"
+  },
+  {
+    "cik": 78003,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "PFIZER INC",
+    "role": "company",
+    "ticker": "PFE"
+  },
+  {
+    "cik": 1551152,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "AbbVie Inc.",
+    "role": "company",
+    "ticker": "ABBV"
+  },
+  {
+    "cik": 310158,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "Merck & Co., Inc.",
+    "role": "company",
+    "ticker": "MRK"
+  },
+  {
+    "cik": 97745,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "THERMO FISHER SCIENTIFIC INC.",
+    "role": "company",
+    "ticker": "TMO"
+  },
+  {
+    "cik": 1800,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "ABBOTT LABORATORIES",
+    "role": "company",
+    "ticker": "ABT"
+  },
+  {
+    "cik": 80424,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "PROCTER & GAMBLE Co",
+    "role": "company",
+    "ticker": "PG"
+  },
+  {
+    "cik": 21344,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "COCA COLA CO",
+    "role": "company",
+    "ticker": "KO"
+  },
+  {
+    "cik": 77476,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "PEPSICO INC",
+    "role": "company",
+    "ticker": "PEP"
+  },
+  {
+    "cik": 104169,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "Walmart Inc.",
+    "role": "company",
+    "ticker": "WMT"
+  },
+  {
+    "cik": 909832,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "COSTCO WHOLESALE CORP /NEW",
+    "role": "company",
+    "ticker": "COST"
+  },
+  {
+    "cik": 63908,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "MCDONALDS CORP",
+    "role": "company",
+    "ticker": "MCD"
+  },
+  {
+    "cik": 320187,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "NIKE, Inc.",
+    "role": "company",
+    "ticker": "NKE"
+  },
+  {
+    "cik": 354950,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "HOME DEPOT, INC.",
+    "role": "company",
+    "ticker": "HD"
+  },
+  {
+    "cik": 2115436,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "ExxonMobil Holdings Corp",
+    "role": "company",
+    "ticker": "XOM"
+  },
+  {
+    "cik": 93410,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "CHEVRON CORP",
+    "role": "company",
+    "ticker": "CVX"
+  },
+  {
+    "cik": 18230,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "CATERPILLAR INC",
+    "role": "company",
+    "ticker": "CAT"
+  },
+  {
+    "cik": 12927,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "BOEING CO",
+    "role": "company",
+    "ticker": "BA"
+  },
+  {
+    "cik": 40545,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "GENERAL ELECTRIC CO",
+    "role": "company",
+    "ticker": "GE"
+  },
+  {
+    "cik": 100885,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "UNION PACIFIC CORP",
+    "role": "company",
+    "ticker": "UNP"
+  },
+  {
+    "cik": 773840,
+    "currency": "USD",
+    "exchange": "Nasdaq",
+    "market": "US",
+    "name": "HONEYWELL INTERNATIONAL INC",
+    "role": "company",
+    "ticker": "HON"
+  },
+  {
+    "cik": 936468,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "LOCKHEED MARTIN CORP",
+    "role": "company",
+    "ticker": "LMT"
+  },
+  {
+    "cik": 732717,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "AT&T INC.",
+    "role": "company",
+    "ticker": "T"
+  },
+  {
+    "cik": 732712,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "VERIZON COMMUNICATIONS INC",
+    "role": "company",
+    "ticker": "VZ"
+  },
+  {
+    "cik": 753308,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "NEXTERA ENERGY INC",
+    "role": "company",
+    "ticker": "NEE"
+  },
+  {
+    "cik": 1744489,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "Walt Disney Co",
+    "role": "company",
+    "ticker": "DIS"
+  },
+  {
+    "cik": 1403161,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "VISA INC.",
+    "role": "company",
+    "ticker": "V"
+  },
+  {
+    "cik": 1141391,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "Mastercard Inc",
+    "role": "company",
+    "ticker": "MA"
+  },
+  {
+    "cik": 884394,
+    "currency": "USD",
+    "exchange": "NYSE",
+    "market": "US",
+    "name": "SPDR S&P 500 ETF TRUST",
+    "role": "benchmark",
+    "ticker": "SPY"
+  }
+]

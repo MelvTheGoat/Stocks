@@ -83,7 +83,10 @@ def load_dividends(store: MarketStore, market: Market, ticker: str) -> list[Divi
         """,
         [market, ticker],
     )
-    return [Dividend(ticker, market, day, amount, currency, source) for day, amount, currency, source in rows]
+    return [
+        Dividend(ticker, market, day, amount, currency, source)
+        for day, amount, currency, source in rows
+    ]
 
 
 def resolve_name(store: MarketStore, text: str) -> list[str]:

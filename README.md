@@ -59,16 +59,28 @@ tests/              pytest suite; never calls a real model
 data/samples/       small fixture files used by tests
 ```
 
-## Running the tests
+## Seeing it work
 
 ```bash
 pip install -r requirements-dev.txt
 pip install -e .
-pytest
+
+python scripts/demo.py   # runs every piece built so far and explains itself
+pytest                   # the full test suite
 ```
 
+`scripts/demo.py` works from sample responses saved in the repository, so it
+needs no API key, reaches no network, and prints the same thing on any machine.
+It reads real saved market data, stores it, queries it with SQL, catches a
+planted bad price by comparing two sources, and answers a question about a day
+the market was shut.
+
 Tests never reach the network and never call a real model. They use a fake
-model client that returns scripted replies.
+model client that returns scripted replies. `pytest --disable-socket` passes
+too, which is the proof rather than the promise.
+
+There is no web page to look at yet. The trace viewer, where you can click
+through what the agent did on each question, arrives with the agent itself.
 
 ## Data sources
 

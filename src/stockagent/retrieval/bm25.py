@@ -94,9 +94,14 @@ class BM25Index:
         self.k1 = k1
         self.b = b
         self._documents: list[Document] = []
-        self._tokens: list[list[str]] = []
+        self._lengths: list[int] = []
         self._counts: list[Counter[str]] = []
         self._document_frequency: Counter[str] = Counter()
+        # term -> the documents containing it. Without this, every query scores
+        # every document, and a corpus of a hundred thousand daily records makes
+        # each search a second long. With it, only the documents that could
+        # possibly match are touched.
+        self._postings: dict[str, list[int]] = {}
         self._total_length = 0
         for document in documents:
             self.add(document)
@@ -104,13 +109,15 @@ class BM25Index:
     def add(self, document: Document) -> None:
         tokens = tokenize(document.text)
         counts = Counter(tokens)
+        index = len(self._documents)
         self._documents.append(document)
-        self._tokens.append(tokens)
+        self._lengths.append(len(tokens))
         self._counts.append(counts)
         self._total_length += len(tokens)
         # Document frequency counts documents, not occurrences.
         for term in counts:
             self._document_frequency[term] += 1
+            self._postings.setdefault(term, []).append(index)
 
     def add_all(self, documents: Iterable[Document]) -> None:
         for document in documents:
@@ -141,7 +148,7 @@ class BM25Index:
 
     def score(self, query_terms: Sequence[str], index: int) -> tuple[float, list[str]]:
         counts = self._counts[index]
-        length = len(self._tokens[index])
+        length = self._lengths[index]
         average = self.average_length or 1.0
 
         total = 0.0
@@ -168,8 +175,16 @@ class BM25Index:
         if not terms or not self._documents:
             return []
 
+        # Only documents holding at least one query term can score above zero,
+        # so the rest are never looked at.
+        candidates: set[int] = set()
+        for term in terms:
+            candidates.update(self._postings.get(term, ()))
+        if not candidates:
+            return []
+
         hits = []
-        for index in range(len(self._documents)):
+        for index in candidates:
             score, matched = self.score(terms, index)
             if score <= 0:
                 continue

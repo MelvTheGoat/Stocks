@@ -32,9 +32,10 @@ Early. Nothing has been run on a GPU yet.
 
 | Part | State |
 | --- | --- |
-| Repo, config, model client, CI | in progress |
-| NGX daily price collector | in progress |
-| Data pipeline (US + NGX) | not started |
+| Repo, config, model client, CI | done |
+| Data layer: records, store, trading calendar, cross-check | done |
+| US universe (54 companies plus SPY) | defined, no prices collected yet |
+| NGX daily price collector | **abandoned — their terms forbid it** |
 | Eval set | not started |
 | Kaggle runner | not started |
 | Baselines | not run yet |
@@ -43,6 +44,24 @@ Early. Nothing has been run on a GPU yet.
 
 Results tables will appear here once real runs exist. Until then this file says
 "not run yet" rather than showing a placeholder number.
+
+### About the Nigerian half
+
+The plan was to build our own NGX price history, since the full history is sold
+rather than published. That is not going to happen by collecting it.
+
+NGX's terms of use prohibit "systematic or automated data collection
+activities (including scraping, data mining, data extraction and data
+harvesting)" without their express written consent, and separately prohibit
+republishing any part of the site. A daily collector committing prices to a
+public branch would have done both. So it was not built.
+[DATA_SOURCES.md](DATA_SOURCES.md) records the clauses, and also records the
+decoding bug that briefly made those terms look permissive.
+
+Everything in the data layer already carries a market and a currency on every
+row, so Nigerian data would slot in unchanged if written consent is ever
+obtained. Until then this is a US-market project with a documented reason for
+the gap, which is a more honest result than a scraper nobody mentions.
 
 ## Repository layout
 
@@ -59,16 +78,28 @@ tests/              pytest suite; never calls a real model
 data/samples/       small fixture files used by tests
 ```
 
-## Running the tests
+## Seeing it work
 
 ```bash
 pip install -r requirements-dev.txt
 pip install -e .
-pytest
+
+python scripts/demo.py   # runs every piece built so far and explains itself
+pytest                   # the full test suite
 ```
 
+`scripts/demo.py` works from sample responses saved in the repository, so it
+needs no API key, reaches no network, and prints the same thing on any machine.
+It reads real saved market data, stores it, queries it with SQL, catches a
+planted bad price by comparing two sources, and answers a question about a day
+the market was shut.
+
 Tests never reach the network and never call a real model. They use a fake
-model client that returns scripted replies.
+model client that returns scripted replies. `pytest --disable-socket` passes
+too, which is the proof rather than the promise.
+
+There is no web page to look at yet. The trace viewer, where you can click
+through what the agent did on each question, arrives with the agent itself.
 
 ## Data sources
 

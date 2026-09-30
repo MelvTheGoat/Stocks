@@ -1,0 +1,33 @@
+name: probe-sources
+
+# Run by hand from the Actions tab. Answers two questions that cannot be
+# answered from a development container: whether an Actions runner gets past
+# the NGX bot challenge, and whether Stooq is reachable from here.
+#
+# One request per source, nothing collected, nothing stored.
+
+on:
+  workflow_dispatch:
+  # A workflow_dispatch button only appears once the file is on the default
+  # branch, so until this is merged the button does not exist. Running on
+  # pushes that touch the probe itself gives the same answer with no waiting,
+  # and stays quiet the rest of the time.
+  push:
+    paths:
+      - "scripts/probe_sources.py"
+      - ".github/workflows/probe-sources.yml"
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install httpx
+
+      - name: Probe
+        run: python scripts/probe_sources.py

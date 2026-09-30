@@ -19,64 +19,91 @@ a filter in front of a site that blocks traffic it thinks is automated.
 
 ### ngxgroup.com — the main public website
 
-**Status: blocked. Not in use.**
+**Status: RULED OUT. Their terms forbid it.**
 
-This was the intended source for the daily equities price list. It does not
-work, and the reason matters.
+This was to be the source for the daily equities price list. It cannot be
+used, and the reason is the terms of use rather than anything technical.
 
-| Check | Result |
-| --- | --- |
-| `https://ngxgroup.com/robots.txt` | 404 — no crawl policy published |
-| `https://ngxgroup.com/exchange/data/equities-price-list/` | HTTP 307 to a JavaScript bot challenge |
-| `https://ngxgroup.com/` and every other path tried | same 307 challenge |
-| Server header | `Sucuri/Cloudproxy` |
+NGX's Terms and Conditions, at <https://ngxgroup.com/terms/>, say:
 
-The whole site sits behind a Sucuri WAF. Every request is answered with a small
-HTML page that runs JavaScript, sets a `sucuri_cloudproxy_*` cookie and
-reloads. A plain HTTP client never gets past it.
+> You shall not conduct any systematic or automated data collection activities
+> (including scraping, data mining, data extraction and data harvesting) on or
+> in relation to the Website without NGX Group's/its Affiliates' express
+> written consent
 
-Two consequences, and they are separate:
+and, separately:
 
-1. **Technically blocked.** A GitHub Actions runner would meet the same
-   challenge. Actions IP ranges are widely known and tend to be treated more
-   harshly by bot filters, not less.
-2. **Terms could not be verified.** `/terms/`, `/terms-and-conditions/`,
-   `/privacy-policy/`, `/disclaimer/` and `/data-pricing-policies-contracts/`
-   are all behind the same challenge, so the terms of use could not be read.
-   With no robots.txt either, there is no published statement to rely on.
+> You shall not, and shall not attempt to, copy, reproduce, republish, frame,
+> upload to a third party, transmit or distribute the whole or any part of this
+> Website.
 
-Getting past the challenge would mean executing the anti-bot JavaScript or
-replaying its cookie. That is working around a measure the site put there
-deliberately, so it is not on the table.
+That is the exact activity the daily collector would have performed, and the
+exact publication the `ngx-data` branch would have been. Both are prohibited
+without express written consent. So no collector was built.
+
+The terms do name the way through: **express written consent.** Asking NGX for
+permission for a non-commercial research project is the only route to
+first-party NGX data that respects this, and it costs nothing to ask.
+
+#### How this was established, and a near miss worth recording
+
+The site sits behind a Sucuri web application firewall. From the development
+container every request returned HTTP 307 and a JavaScript bot challenge, so
+the terms page could not be read at all. A GitHub Actions runner is served the
+real pages, so the check ran there instead.
+
+The first run reported "no wording about automated access or redistribution
+found" for the terms page. That was **wrong, and it was nearly believed.** The
+server replies with `content-encoding: br`, the runner had no brotli decoder,
+and the body came back as 60 KB of binary noise — which a keyword search
+naturally finds nothing in, while still reporting a plausible character count.
+A decoding failure had produced a clean bill of health.
+
+The fix was to request only encodings that always decode, and to check that a
+body looks like text before drawing any conclusion from it. The corrected run
+found the clauses above in the first pass. Had the bug gone unnoticed, this
+file would have recorded permission that does not exist.
 
 ### dataportal.ngxgroup.com — X-DataPortal
 
-**Status: not usable. Requires an account.**
+**Status: not usable. Account required, and it is the paid product.**
 
-Reachable (not behind the challenge), but it is a login wall: the page posts to
-`/Home/AuthenticateUser` and offers registration and password recovery. This is
-NGX's data product, sold under "Data Pricing, Policies & contracts" on the main
-site. Paid data is out of scope for this project.
+Reachable, and not behind the firewall challenge, but it is a login wall:
+the page posts to `/Home/AuthenticateUser` and offers registration. This is
+NGX's commercial data service, sold under "Data Pricing, Policies &
+contracts". Paid data is out of scope.
+
+This is consistent with the terms: NGX licenses its market data, which is
+precisely why the website forbids taking it for free.
 
 ### Other NGX subdomains
 
 `doc.ngxgroup.com`, `api.ngxgroup.com` and `data.ngxgroup.com` do not resolve.
 
-### african-markets.com — a possible substitute
+### african-markets.com — not usable either
 
-**Status: candidate, terms not yet confirmed.**
+**Status: ruled out on the same grounds, one step removed.**
 
-| Check | Result |
-| --- | --- |
-| `robots.txt` | Present. Blocks only CMS internals (`/administrator/`, `/cache/`, `/modules/` and similar). `/en/stock-markets/` is **not** disallowed. |
-| `/en/stock-markets/ngse/listed-companies` | HTTP 200, serves structured data including ticker and ISIN for NGX listings (DANGCEM, GTCO, MTNN and the rest). |
-| Terms of use page | Not found. `/en/terms-of-use` and `/en/terms` return 404, `/en/disclaimer` returns a server error. |
+Reachable, and its robots.txt permits `/en/stock-markets/`. It serves NGX
+tickers with ISINs.
 
-So robots.txt permits it, but there is no terms page to check, which is not the
-same as permission. This needs a human decision before anything is collected
-from it. It is also a third party republishing NGX figures, not the exchange
-itself, so any data from here would need to be labelled as second-hand in
-COVERAGE.md.
+It is not usable, for two reasons that only became clear once NGX's terms were
+read. It has no terms of use page at all (`/en/terms-of-use` returns 404,
+`/en/disclaimer` a server error), so there is nothing to check. And it is a
+third party republishing NGX figures, while NGX forbids republication of its
+data. Whether they hold a licence to do so is unknown, and collecting from
+them would mean relying on rights that have not been shown to exist.
+
+### What this means for the project
+
+The Nigerian half of this project is blocked on permission, not on code. The
+database, the trading calendar and the record types are all market-agnostic
+and already carry `market` and `currency` on every row, so NGX data would slot
+in unchanged the day consent arrives.
+
+Until then the honest position is the one written down here: we wanted
+first-party Nigerian market data, the exchange's terms prohibit collecting it
+without written consent, and we did not collect it.
 
 ---
 

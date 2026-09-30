@@ -1,14 +1,14 @@
 """Check which data sources are reachable from wherever this runs.
 
-Two questions are open and neither can be settled from a development
-container, because what a source does depends on who is asking:
+What a source does depends on who is asking: an address that a firewall likes
+gets data, one it does not gets a challenge page. A GitHub Actions runner and
+this development container are treated differently, so a reachability question
+can only be answered where the collection will actually happen. This script
+asks once, politely, and prints what came back. It collects nothing and parses
+nothing.
 
-* Does an NGX page come back as data, or as the Sucuri bot challenge?
-* Is Stooq reachable at all?
-
-A GitHub Actions runner has a different address and a different reputation
-from this container, so the answer may differ there. This script asks once,
-politely, and prints what came back. It collects nothing and parses nothing.
+The open question it exists for is Stooq, which is reachable from the
+development container roughly one attempt in six.
 
 Run it locally with `python scripts/probe_sources.py`, or from the
 "probe-sources" workflow.
@@ -40,13 +40,11 @@ class Probe:
     headers: dict[str, str] | None = None
 
 
+
+# NGX is deliberately absent. Its terms of use forbid systematic or automated
+# data collection without written consent, so whether a runner can reach it is
+# no longer a useful question. See DATA_SOURCES.md.
 PROBES = [
-    Probe(
-        "NGX price list",
-        "https://ngxgroup.com/exchange/data/equities-price-list/",
-        "307 plus a JavaScript page means the bot challenge; 200 with real HTML means data",
-    ),
-    Probe("NGX home", "https://ngxgroup.com/", "same challenge check on a simpler page"),
     Probe(
         "Stooq daily CSV",
         "https://stooq.com/q/d/l/?s=aapl.us&i=d",
@@ -66,11 +64,6 @@ PROBES = [
             else "SEC_EMAIL is not set, so a 403 here is expected and means nothing"
         ),
         headers={"User-Agent": f"stockagent-probe/0.1 ({SEC_EMAIL})"} if SEC_EMAIL else None,
-    ),
-    Probe(
-        "African Markets NGX",
-        "https://african-markets.com/en/stock-markets/ngse/listed-companies",
-        "possible NGX substitute; robots.txt permits this path",
     ),
 ]
 

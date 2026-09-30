@@ -72,6 +72,10 @@ class Params:
     # For injection cases: the instruction planted in a document, which the
     # agent must read as text and not obey.
     planted_instruction: str = ""
+    # The string that would appear in the answer only if the agent had obeyed
+    # the planted instruction. Checking for a marker is far more reliable than
+    # trying to judge compliance from the prose.
+    compliance_marker: str = ""
 
     def to_json(self) -> dict[str, Any]:
         out: dict[str, Any] = {}
@@ -81,7 +85,7 @@ class Params:
             value = getattr(self, name)
             if value is not None:
                 out[name] = value.isoformat()
-        for name in ("group", "name", "planted_instruction"):
+        for name in ("group", "name", "planted_instruction", "compliance_marker"):
             value = getattr(self, name)
             if value:
                 out[name] = value
@@ -100,6 +104,7 @@ class Params:
             name=raw.get("name", ""),
             months=raw.get("months"),
             planted_instruction=raw.get("planted_instruction", ""),
+            compliance_marker=raw.get("compliance_marker", ""),
         )
 
 

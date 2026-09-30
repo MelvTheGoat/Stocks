@@ -28,7 +28,9 @@ from stockagent.retrieval.bm25 import BM25Index, Document
 _MONEY_WORD = {"USD": "dollars", "NGN": "naira"}
 
 
-def daily_documents(store: MarketStore, market: str, *, since: date | None = None) -> list[Document]:
+def daily_documents(
+    store: MarketStore, market: str, *, since: date | None = None
+) -> list[Document]:
     rows = store.query(
         """
         SELECT ticker, day, open, high, low, close, volume, currency

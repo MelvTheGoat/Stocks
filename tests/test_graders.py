@@ -362,3 +362,37 @@ def test_ambiguous_wording_does_not_rescue_a_missing_sign():
     # "rose then fell" says nothing definite, so 3.2 stays positive and fails.
     answer = "AAPL rose then fell, ending 3.2% away."
     assert not NumericGrader().grade(answer, numeric_truth(-3.2, "percent")).passed
+
+
+def test_a_source_list_naming_only_tables_passes_trivially():
+    # Resolving a company name cites "securities" and "aliases", which carry no
+    # ticker or date. An expectation with nothing in it cannot be violated, and
+    # failing here marked every correct name lookup as uncited.
+    truth = Truth(kind="text", text="AAPL", unit="ticker", sources=("securities", "aliases"))
+    assert SourceGrader().grade("Apple Inc. is AAPL.", truth).passed
+
+
+def test_a_return_is_not_treated_as_an_upward_move():
+    # "returned" says nothing about direction: a return can be negative. Treating
+    # it as an up word made "KO returned -5.7% ... so it lagged by 2.85 points"
+    # read as a gain, failing a correct answer.
+    assert stated_direction("KO returned -5.70% against SPY") is None
+
+
+@pytest.mark.parametrize(
+    ("answer", "expected"),
+    [
+        ("it lagged the benchmark by 2.85 points", "down"),
+        ("it trailed the index", "down"),
+        ("it underperformed", "down"),
+        ("it beat the benchmark by 2.85 points", "up"),
+        ("it outperformed the index", "up"),
+    ],
+)
+def test_comparison_verbs_carry_direction(answer, expected):
+    assert stated_direction(answer) == expected
+
+
+def test_a_benchmark_gap_worded_as_lagging_matches_a_negative_truth():
+    answer = "KO returned -5.70% against SPY's -2.85%, so it lagged the benchmark by 2.85 points."
+    assert NumericGrader().grade(answer, numeric_truth(-2.85, "percent")).passed

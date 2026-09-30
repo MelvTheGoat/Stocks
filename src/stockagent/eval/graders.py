@@ -44,14 +44,20 @@ _PERCENT_WORDS = {"%", "percent", "per cent", "percent."}
 # Words that carry the sign when the figure itself does not. "It fell 3.2%" is a
 # perfectly good way to report minus 3.2, and an extractor that only understands
 # a minus sign marks most correct answers about losses wrong.
+# "returned" is deliberately absent from the up words. A return can perfectly
+# well be negative, so treating it as a direction made "KO returned -5.7% ... so
+# it lagged the benchmark by 2.85 points" read as an upward move, and a correct
+# answer graded as wrong. Comparison verbs are included, because that is how a
+# signed gap against a benchmark is actually worded.
 _DOWN_WORDS = re.compile(
     r"\b(fell|fall|falling|dropped|drop|declined|decline|lost|loss|lower|down"
-    r"|decreased|decrease|shed|slid|negative)\b",
+    r"|decreased|decrease|shed|slid|negative|lagged|lag|trailed|trail"
+    r"|underperformed|underperform|behind|worse)\b",
     re.IGNORECASE,
 )
 _UP_WORDS = re.compile(
     r"\b(rose|rise|risen|gained|gain|climbed|climb|up|higher|increased|increase"
-    r"|advanced|grew|growth|positive|returned)\b",
+    r"|advanced|grew|growth|positive|beat|outperformed|outperform|ahead|better)\b",
     re.IGNORECASE,
 )
 
@@ -333,6 +339,14 @@ class SourceGrader:
                 wanted.add(parts[2].lower())
             if len(parts) >= 4:
                 wanted.add(parts[3].lower())
+
+        # Some sources name a table rather than a record -- resolving a company
+        # name cites "securities" and "aliases", which carry no ticker or date.
+        # An expectation with nothing in it cannot be violated, and failing here
+        # would mark every correct name lookup as uncited.
+        if not wanted:
+            return Grade(self.name, True, "no citable identifier in the sources")
+
         hits = [token for token in wanted if token and token in text]
         if not hits:
             return Grade(self.name, False, f"cites none of {sorted(wanted)}")

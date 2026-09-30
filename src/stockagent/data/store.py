@@ -134,6 +134,7 @@ class MarketStore:
     def __init__(self, root: str | Path):
         self.root = Path(root)
         self.root.mkdir(parents=True, exist_ok=True)
+        self._cached: duckdb.DuckDBPyConnection | None = None
 
     def path_for(self, table: str) -> Path:
         return self.root / f"{table}.parquet"
@@ -174,6 +175,9 @@ class MarketStore:
         temporary = path.with_suffix(".parquet.tmp")
         pq.write_table(merged.cast(spec.schema), temporary)
         temporary.replace(path)
+        # The shared read connection holds views over the old files, and a
+        # table written for the first time is not in it at all.
+        self.close()
         return merged.num_rows
 
     def write_bars(self, bars: Iterable[Bar]) -> int:
@@ -225,9 +229,26 @@ class MarketStore:
                 connection.execute(f"CREATE VIEW {name} AS SELECT * FROM _empty_{name}")
         return connection
 
+    def _shared(self) -> duckdb.DuckDBPyConnection:
+        """A connection kept open across queries.
+
+        Opening a connection and re-declaring every view costs more than most of
+        the queries in this project put together. Generating the eval set runs
+        thousands of small reads, and with a fresh connection each time it took
+        minutes rather than seconds. The connection is dropped after any write so
+        the next read sees the new parquet files.
+        """
+        if self._cached is None:
+            self._cached = self.connect()
+        return self._cached
+
     def query(self, sql: str, parameters: Sequence[Any] | None = None) -> list[tuple]:
-        with self.connect() as connection:
-            return connection.execute(sql, parameters or []).fetchall()
+        return self._shared().execute(sql, parameters or []).fetchall()
+
+    def close(self) -> None:
+        if self._cached is not None:
+            self._cached.close()
+            self._cached = None
 
     def coverage(self) -> list[Coverage]:
         rows = self.query(

@@ -29,6 +29,29 @@ BASE = "https://ngxgroup.com"
 USER_AGENT = "stockagent/0.1 (research project; github.com/MelvTheGoat/Stocks)"
 OUTPUT = Path("ngx-capture")
 
+# Ask only for encodings every httpx install can decode. The first run of this
+# script asked for anything, got brotli back, had no brotli decoder, and wrote
+# 60 KB of binary noise to the artifact -- while still reporting a plausible
+# character count for every page. That nearly turned a decoding failure into a
+# finding about what NGX's terms permit. Naming two safe encodings removes the
+# whole failure mode rather than detecting it.
+HEADERS = {
+    "User-Agent": USER_AGENT,
+    "Accept-Encoding": "gzip, deflate",
+    "Accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
+}
+
+# If a page still comes back undecodable, say so instead of analysing noise.
+PRINTABLE = re.compile(r"[\t\n\r\x20-\x7e]")
+
+
+def is_readable(text: str) -> bool:
+    """True if the text looks like text rather than a failed decode."""
+    if not text:
+        return False
+    sample = text[:4000]
+    return len(PRINTABLE.findall(sample)) / len(sample) > 0.85
+
 PRICE_LIST = "/exchange/data/equities-price-list/"
 
 TERMS_PAGES = [
@@ -63,6 +86,7 @@ def heading(text: str) -> None:
 
 def report_terms(client: httpx.Client) -> None:
     heading("Terms, robots.txt and data policy")
+    OUTPUT.mkdir(parents=True, exist_ok=True)
 
     for path in TERMS_PAGES:
         url = BASE + path
@@ -72,11 +96,19 @@ def report_terms(client: httpx.Client) -> None:
             print(f"\n--- {path}: unreachable ({type(error).__name__})")
             continue
 
+        encoding = response.headers.get("content-encoding", "none")
         if response.status_code >= 400:
             print(f"\n--- {path}: HTTP {response.status_code} (page does not exist)")
             continue
 
         body = response.text
+        if not is_readable(body):
+            print(
+                f"\n--- {path}: HTTP {response.status_code} but the body did not decode "
+                f"(content-encoding: {encoding}). Nothing can be concluded from it."
+            )
+            continue
+
         if "sucuri" in body[:4000].lower() or "javascript is required" in body[:4000].lower():
             print(f"\n--- {path}: still the bot challenge, could not read")
             continue
@@ -87,6 +119,11 @@ def report_terms(client: httpx.Client) -> None:
             continue
 
         text = strip_tags(body)
+        # Saved so the terms can be read in full rather than trusted to a
+        # keyword search. A grep finding nothing is weak evidence; the text
+        # itself is the evidence.
+        slug = path.strip("/").replace("/", "-") or "home"
+        (OUTPUT / f"terms-{slug}.txt").write_text(text)
         matches = []
         for match in RESTRICTION_WORDS.finditer(text):
             start, end = max(0, match.start() - 180), min(len(text), match.end() + 180)
@@ -111,9 +148,17 @@ def report_price_list(client: httpx.Client) -> None:
 
     url = BASE + PRICE_LIST
     response = client.get(url)
-    print(f"HTTP {response.status_code}, {len(response.content)} bytes")
+    encoding = response.headers.get("content-encoding", "none")
+    print(
+        f"HTTP {response.status_code}, {len(response.content)} bytes, "
+        f"content-type: {response.headers.get('content-type', '?')}, "
+        f"content-encoding: {encoding}"
+    )
 
     body = response.text
+    if not is_readable(body):
+        print(f"the body did not decode (content-encoding: {encoding}); not analysing noise")
+        return
     if "sucuri" in body[:4000].lower():
         print("still the bot challenge; nothing to save")
         return
@@ -121,7 +166,7 @@ def report_price_list(client: httpx.Client) -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     saved = OUTPUT / "equities_price_list.html"
     saved.write_text(body)
-    print(f"saved to {saved}")
+    print(f"saved to {saved} ({len(body)} chars)")
 
     tables = re.findall(r"(?is)<table.*?</table>", body)
     print(f"\n{len(tables)} <table> elements found")
@@ -155,9 +200,7 @@ def report_price_list(client: httpx.Client) -> None:
 
 
 def main() -> int:
-    with httpx.Client(
-        headers={"User-Agent": USER_AGENT}, timeout=40.0, follow_redirects=True
-    ) as client:
+    with httpx.Client(headers=HEADERS, timeout=40.0, follow_redirects=True) as client:
         report_terms(client)
         report_price_list(client)
 

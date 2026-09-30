@@ -26,7 +26,11 @@ jobs:
         with:
           python-version: "3.11"
 
-      - run: pip install httpx
+      # brotli and zstd decoders, so a compressed reply cannot come out as
+      # binary noise. The script also asks only for gzip and deflate; both
+      # belts, because a silent decode failure looked exactly like a readable
+      # page the first time round.
+      - run: pip install "httpx[brotli,zstd]"
 
       - name: Read the pages
         run: python scripts/inspect_ngx.py

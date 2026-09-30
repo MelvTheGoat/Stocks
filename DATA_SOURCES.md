@@ -151,22 +151,76 @@ A quiet trap worth recording: a rate-limited request returns **HTTP 200** with
 a JSON object containing a polite sentence instead of data. Parsed carelessly
 that looks like a stock which never traded. The parser raises on it instead.
 
-### Twelve Data - candidate bulk source
+### Twelve Data - in use as the bulk source
 
-**Status: candidate. Needs a free API key.**
+**Status: in use. Free tier. Data may NOT be published.**
 
 | Check | Result |
 | --- | --- |
-| `time_series` with the demo key | HTTP 200, real daily OHLC for AAPL |
+| `time_series` | HTTP 200, daily open/high/low/close/volume |
+| `dividends` | HTTP 200, ex-date and amount |
+| `splits` | HTTP 200, with `from_factor`, `to_factor` and a description |
 | Free "Basic" plan, from their pricing page | 8 requests per minute |
 
-The free tier is far roomier than Alpha Vantage's, which makes it the
-realistic candidate for collecting all 55 securities. Dividends and splits are
-separate endpoints, so a full refresh is roughly 165 calls, comfortably inside
-an 8-per-minute budget spread over half an hour.
+Three behaviours are recorded here because each one produces a wrong number
+rather than an error:
 
-Not adopted yet: it needs a free account, and only the per-minute limit has
-been confirmed, not the daily one.
+**The split factor is ambiguous in the response.** Apple's 2020 split arrives
+as `{"ratio": 0.25, "from_factor": 4, "to_factor": 1, "description": "4-for-1
+split"}`. Taking `ratio` as the factor inverts every split-adjusted return and
+nothing fails. The parser uses `from_factor / to_factor` and then checks the
+result against the number in the description, refusing to parse if they
+disagree.
+
+**`end_date` is exclusive.** A request for the 14th to the 29th returns nothing
+dated the 29th. The client sends one day later than asked so no caller has to
+remember.
+
+**There is no adjusted close.** Prices come as quoted, so adjusting for splits
+and dividends is our own job. That is more work and better for this project:
+the eval asks about split-adjusted returns, so the adjustment is part of what
+is being measured and should not be a vendor's undocumented convention.
+
+Also worth knowing: the last bar is the day in progress while the market is
+open, carrying a partial volume and a "close" that is only the latest trade.
+The collector defaults its as-of date to yesterday for that reason.
+
+#### Their terms, and where the data is therefore kept
+
+Twelve Data's Terms of Use, at <https://twelvedata.com/terms>, grant a licence
+to "Access, receive, process, and store Data solely for Internal Use", and
+define Internal Use as "use solely for Customer's internal business purposes
+and **not for redistribution** or external commercial purposes". Section 2.3
+then prohibits the Customer from:
+
+> Redistribute, resell, sublicense, or transfer any Data or access rights to
+> third parties except as expressly permitted by your Subscription Tier, Data
+> Add-ons, or a separate agreement with Twelve Data
+
+with "Redistribution" defined as "any publication, distribution, or provision
+of Data to third parties". The free tier carries no redistribution add-on.
+
+So committing the collected prices to this public repository would breach the
+licence. Two consequences, both already in force:
+
+- `data/db/` is in `.gitignore`. The database is never committed, and no
+  workflow uploads it as an artifact of a public repository, since anyone who
+  can see the repository could download that.
+- **Ground truth is computed, not stored.** The eval set holds question text
+  and parameters; the correct answers are worked out at run time by reference
+  code reading whoever's local database. A committed answer like "AAPL closed
+  at 338.40" would be redistribution; the question "what did AAPL close at on
+  28 September 2026" is not.
+
+The licence does permit "Derived Data that cannot be reverse-engineered to
+recreate the original Data", which is what every published result in this
+project is: accuracy rates, error counts, latency figures, and the date ranges
+and row counts in COVERAGE.md.
+
+Reproducibility survives this intact. Anyone with their own free key runs
+`python scripts/collect_us.py` and gets a byte-identical database, then every
+number in the report regenerates. That is a better arrangement than shipping a
+copy of someone else's data and hoping nobody reads the licence.
 
 ### Stooq - unresolved
 

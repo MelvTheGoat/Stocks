@@ -12,6 +12,17 @@ runs/output/
 *.duckdb
 *.duckdb.wal
 
+# The collected market database. Never committed.
+#
+# Twelve Data's terms license the data for "Internal Use ... not for
+# redistribution", and define redistribution as "any publication, distribution,
+# or provision of Data to third parties". Committing these files to a public
+# repository would be exactly that. The repository holds the collector instead,
+# so anyone with their own free key can rebuild an identical database.
+data/db/
+data/raw/
+
+
 # The model response cache is large and goes to Hugging Face, not git.
 .cache/
 cache/

@@ -1,0 +1,28 @@
+name: agent-purpose-built-dev
+description: >
+  Experiment B, arm one: purpose-built lookups only, no SQL and no document
+  search. Tests whether SQL earns its place or just gives the model rope.
+
+model:
+  name: Qwen/Qwen2.5-7B-Instruct-AWQ
+  hf_repo: Qwen/Qwen2.5-7B-Instruct-AWQ
+  quantization: awq
+  dtype: float16
+  max_model_len: 8192
+  temperature: 0.0
+  max_tokens: 700
+  seed: 0
+
+eval:
+  split: dev
+  version: v1
+  as_of: "2026-09-29"
+  limit: null
+
+agent:
+  kind: agent
+  max_steps: 8
+  tools: [resolve_security, get_prices, get_dividends, get_corporate_actions, calculate]
+  self_check: false
+
+seed: 0

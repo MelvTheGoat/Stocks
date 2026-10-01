@@ -1,0 +1,29 @@
+name: agent-self-check-dev
+description: >
+  Experiment D: one extra pass where the agent re-checks its own figures
+  before answering. Compared with agent-dev on accuracy, tokens and latency,
+  because the question is whether it pays for itself.
+
+model:
+  name: Qwen/Qwen2.5-7B-Instruct-AWQ
+  hf_repo: Qwen/Qwen2.5-7B-Instruct-AWQ
+  quantization: awq
+  dtype: float16
+  max_model_len: 8192
+  temperature: 0.0
+  max_tokens: 700
+  seed: 0
+
+eval:
+  split: dev
+  version: v1
+  as_of: "2026-09-29"
+  limit: null
+
+agent:
+  kind: agent
+  max_steps: 10
+  tools: []
+  self_check: true
+
+seed: 0

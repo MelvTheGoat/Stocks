@@ -1,0 +1,68 @@
+# Jobs the Kaggle notebook works through, in order.
+#
+# A job is finished when its results file exists on the "results" branch. Nothing
+# writes status back here, so this file and the actual results cannot disagree.
+#
+# The smoke test is first on purpose: it proves vLLM starts, the client reaches
+# it, questions get asked and graded, and results reach the results branch. Five
+# questions, a couple of minutes. Everything after it assumes that worked.
+#
+# Budgets are in minutes and are deliberately under Kaggle's twelve-hour limit.
+# A job that runs out of budget stops cleanly and the next session resumes it.
+
+jobs:
+  - name: smoke
+    config: configs/smoke.yaml
+    note: proves the pipeline works end to end on the GPU. Five questions.
+    budget_minutes: 30
+
+  - name: closed-book-dev
+    config: configs/closed-book-dev.yaml
+    note: >
+      Baseline A. The model answers from memory with no data. Measures how often
+      it states a confident wrong figure.
+    budget_minutes: 120
+    after: [smoke]
+
+  - name: retrieval-dev
+    config: configs/retrieval-dev.yaml
+    note: Baseline B. One BM25 search, one answer. The obvious system.
+    budget_minutes: 180
+    after: [smoke]
+
+  - name: agent-dev
+    config: configs/agent-dev.yaml
+    note: >
+      Experiment A. The agent with all tools. This is the number the baselines
+      exist to be compared against.
+    budget_minutes: 300
+    after: [smoke]
+
+  - name: agent-purpose-built-dev
+    config: configs/agent-purpose-built-dev.yaml
+    note: Experiment B. Purpose-built tools, no SQL. Does SQL earn its place?
+    budget_minutes: 300
+    after: [agent-dev]
+
+  - name: agent-sql-only-dev
+    config: configs/agent-sql-only-dev.yaml
+    note: Experiment B. The model writes its own queries instead.
+    budget_minutes: 300
+    after: [agent-dev]
+
+  - name: agent-self-check-dev
+    config: configs/agent-self-check-dev.yaml
+    note: >
+      Experiment D. An extra pass where the agent verifies its own figures.
+      Compared against agent-dev on accuracy, tokens and latency.
+    budget_minutes: 360
+    after: [agent-dev]
+
+  - name: agent-dev-repeat
+    config: configs/agent-dev-repeat.yaml
+    note: >
+      The same job as agent-dev with a different sampling seed, to measure how
+      much of any difference elsewhere is just noise. Without this, a two-point
+      gap cannot be told from run-to-run variation.
+    budget_minutes: 300
+    after: [agent-dev]

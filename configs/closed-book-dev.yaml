@@ -1,0 +1,27 @@
+name: closed-book-dev
+description: >
+  Baseline A: the model answers from memory, with no tools and no data.
+  The point is to measure how often a fluent model states a confident wrong
+  figure, and whether that rate differs between well-known and obscure names.
+
+model:
+  name: Qwen/Qwen2.5-7B-Instruct-AWQ
+  hf_repo: Qwen/Qwen2.5-7B-Instruct-AWQ
+  quantization: awq
+  dtype: float16
+  max_model_len: 8192
+  temperature: 0.0
+  max_tokens: 700
+  seed: 0
+
+eval:
+  split: dev
+  version: v1
+  as_of: "2026-09-29"
+  limit: null
+
+agent:
+  kind: closed_book
+  max_steps: 1
+
+seed: 0

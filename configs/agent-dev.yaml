@@ -1,0 +1,28 @@
+name: agent-dev
+description: >
+  Experiment A: the agent with every tool. The number the two baselines exist
+  to be compared against.
+
+model:
+  name: Qwen/Qwen2.5-7B-Instruct-AWQ
+  hf_repo: Qwen/Qwen2.5-7B-Instruct-AWQ
+  quantization: awq
+  dtype: float16
+  max_model_len: 8192
+  temperature: 0.0
+  max_tokens: 700
+  seed: 0
+
+eval:
+  split: dev
+  version: v1
+  as_of: "2026-09-29"
+  limit: null
+
+agent:
+  kind: agent
+  max_steps: 8
+  tools: []        # empty means the full set
+  self_check: false
+
+seed: 0

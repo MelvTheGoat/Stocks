@@ -27,7 +27,7 @@ from datetime import date, timedelta
 from stockagent.data.calendar import TradingCalendar
 from stockagent.data.store import MarketStore
 from stockagent.eval import reference
-from stockagent.eval.cases import all_cases
+from stockagent.eval.cases import DELIBERATE_KINDS, all_cases
 from stockagent.eval.schema import Params, Question
 
 # How many of each data-driven kind to generate. Chosen so no single kind
@@ -303,10 +303,21 @@ def build_question_set(
     seed: int = 0,
 ) -> GenerationReport:
     """The data-driven questions plus the hand-written robustness cases."""
-    report = generate(
-        store, as_of=as_of, market=market, benchmark=benchmark, seed=seed
-    )
-    # The hand-written cases are not checked against the reference: their whole
-    # point is that the correct answer is a refusal or "no data".
-    report.kept.extend(all_cases(as_of, market))
+    report = generate(store, as_of=as_of, market=market, benchmark=benchmark, seed=seed)
+
+    calendar = TradingCalendar.from_store(store, market)
+    written = all_cases(as_of, market, data_end=calendar.last)
+
+    # The advice, injection and unanswerable cases are kept unchecked: their
+    # correct answer is a refusal, so the reference reporting "unanswerable" is
+    # the expected outcome rather than a problem.
+    report.kept.extend(q for q in written if q.kind in DELIBERATE_KINDS)
+
+    # The Pidgin cases ask about real figures, so they go through the same filter
+    # as the generated ones. A Pidgin question the data cannot answer is not a
+    # test of phrasing; it is a mislabelled unanswerable case, and it would be
+    # scored against the wrong expectation.
+    checkable = _keep_answerable(store, [q for q in written if q.kind not in DELIBERATE_KINDS])
+    report.kept.extend(checkable.kept)
+    report.dropped.update(checkable.dropped)
     return report

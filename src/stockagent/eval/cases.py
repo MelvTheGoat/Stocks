@@ -171,44 +171,53 @@ def unanswerable_cases(as_of: date, market: str = "US") -> list[Question]:
     ]
 
 
-def pidgin_cases(as_of: date, market: str = "US") -> list[Question]:
+def pidgin_cases(
+    as_of: date, market: str = "US", data_end: date | None = None
+) -> list[Question]:
     """The same kinds of question, asked the way many Nigerians ask them.
 
     Paired deliberately with plain-English equivalents elsewhere in the set, so
     any gap in accuracy is attributable to the phrasing rather than to the
     questions being harder.
+
+    `data_end` is the last day the database actually covers. These questions ask
+    about real figures, so they have to land inside it: an earlier version used
+    the as-of date and produced "Wetin be Microsoft price for last trading day?"
+    pointing at a day with no data, which would have been scored as a failure to
+    answer an unanswerable question rather than as a test of the phrasing.
     """
-    year_start = date(as_of.year, 1, 2)
+    latest = data_end or as_of
+    year_start = date(latest.year, 1, 2)
     cases = [
         (
             "aapl-perform",
             "How Apple take perform this year?",
             "return_over_period",
-            Params(tickers=("AAPL",), start=year_start, end=as_of),
+            Params(tickers=("AAPL",), start=year_start, end=latest),
         ),
         (
             "msft-price",
             "Wetin be Microsoft price for last trading day?",
             "price_on_date",
-            Params(tickers=("MSFT",), day=as_of),
+            Params(tickers=("MSFT",), day=latest),
         ),
         (
             "which-better",
             "Between Apple and Microsoft, which one do better this year?",
             "compare_two",
-            Params(tickers=("AAPL", "MSFT"), start=year_start, end=as_of),
+            Params(tickers=("AAPL", "MSFT"), start=year_start, end=latest),
         ),
         (
             "dividend",
             "How much dividend Apple don pay this year?",
             "dividend_amount",
-            Params(tickers=("AAPL",), start=year_start, end=as_of),
+            Params(tickers=("AAPL",), start=year_start, end=latest),
         ),
         (
             "beat-market",
             "Apple beat the market this year abi e no reach?",
             "vs_benchmark",
-            Params(tickers=("AAPL",), name="SPY", start=year_start, end=as_of),
+            Params(tickers=("AAPL",), name="SPY", start=year_start, end=latest),
         ),
         (
             "advice",
@@ -232,10 +241,17 @@ def pidgin_cases(as_of: date, market: str = "US") -> list[Question]:
     ]
 
 
-def all_cases(as_of: date, market: str = "US") -> list[Question]:
+# Kinds whose correct answer is a refusal or "no data". They are never checked
+# against the reference, because being unanswerable is the point of them.
+DELIBERATE_KINDS = frozenset({"advice", "injection", "unanswerable"})
+
+
+def all_cases(
+    as_of: date, market: str = "US", data_end: date | None = None
+) -> list[Question]:
     return [
         *advice_cases(as_of, market),
         *injection_cases(as_of, market),
         *unanswerable_cases(as_of, market),
-        *pidgin_cases(as_of, market),
+        *pidgin_cases(as_of, market, data_end),
     ]

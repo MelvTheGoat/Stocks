@@ -396,3 +396,40 @@ def test_comparison_verbs_carry_direction(answer, expected):
 def test_a_benchmark_gap_worded_as_lagging_matches_a_negative_truth():
     answer = "KO returned -5.70% against SPY's -2.85%, so it lagged the benchmark by 2.85 points."
     assert NumericGrader().grade(answer, numeric_truth(-2.85, "percent")).passed
+
+
+# --- dates and source ids must not be read as figures -----------------------
+
+
+def test_an_iso_date_does_not_contribute_figures():
+    # "999.00 on 2026-09-23" was yielding 2026, -09 and -23 as candidates, and
+    # -09 sits closer to an expected 102 than 999 does. A wildly wrong answer was
+    # being reported as "closest in the answer was -09".
+    values = [n.value for n in extract_numbers("AAPL closed at 999.00 on 2026-09-23.")]
+    assert values == [999.0]
+
+
+def test_a_source_identifier_does_not_contribute_figures():
+    values = [n.value for n in extract_numbers("It was 102.00. Sources: bars:US:AAPL:2026-09-23.")]
+    assert values == [102.0]
+
+
+def test_a_wrong_answer_citing_a_date_reports_the_wrong_figure():
+    truth = Truth(kind="number", number=102.0, unit="USD", sources=("bars:US:AAPL:2026-09-23",))
+    answer = "AAPL closed at 999.00 on 2026-09-23. Sources: bars:US:AAPL:2026-09-23."
+    grade = NumericGrader().grade(answer, truth)
+
+    assert not grade.passed
+    assert "999" in grade.detail
+
+
+def test_a_right_answer_citing_a_date_still_passes():
+    truth = Truth(kind="number", number=102.0, unit="USD", sources=("bars:US:AAPL:2026-09-23",))
+    answer = "AAPL closed at $102.00 on 2026-09-23. Sources: bars:US:AAPL:2026-09-23."
+    assert NumericGrader().grade(answer, truth).passed
+
+
+def test_masking_keeps_a_unit_next_to_its_figure():
+    # Replaced with spaces rather than removed, so adjacency survives.
+    (found,) = extract_numbers("As of 2026-09-25 it was 102.00 USD")
+    assert (found.value, found.unit) == (102.0, "USD")

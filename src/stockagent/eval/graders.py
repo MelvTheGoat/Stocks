@@ -127,10 +127,33 @@ def _normalise_unit(before: str | None, after: str | None) -> str | None:
     return None
 
 
+_ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+# A source identifier such as bars:US:AAPL:2026-09-23. Machine strings, never an
+# answer, and full of digits.
+_SOURCE_ID = re.compile(r"\b[a-z_]+:[A-Za-z0-9:_.\-]+")
+
+
+def mask_non_figures(text: str) -> str:
+    """Blank out things that look like numbers but are not figures.
+
+    An ISO date is the dangerous one. "AAPL closed at 999.00 on 2026-09-23"
+    yields 2026, -09 and -23 as candidates alongside 999, and -09 happens to sit
+    closer to an expected 102 than 999 does -- so a wildly wrong answer was being
+    reported as "closest in the answer was -09". Source identifiers like
+    bars:US:AAPL:2026-09-23 are machine strings and never the answer either.
+
+    Replaced with spaces rather than removed, so the positions of everything
+    else stay put and a unit sitting next to a real figure is still adjacent.
+    """
+    without_sources = _SOURCE_ID.sub(lambda m: " " * len(m.group(0)), text or "")
+    return _ISO_DATE.sub(lambda m: " " * len(m.group(0)), without_sources)
+
+
 def extract_numbers(text: str) -> list[ExtractedNumber]:
     """Every figure in the text, with whatever unit it was written with."""
     found = []
-    for match in _NUMBER.finditer(text or ""):
+    for match in _NUMBER.finditer(mask_non_figures(text)):
         raw = match.group("value").replace(",", "")
         try:
             value = float(raw)

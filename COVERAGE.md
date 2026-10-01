@@ -2,7 +2,7 @@
 
 What the database actually holds, per market and per security.
 
-Generated from the database on 2026-09-28. Do not edit by hand: run
+Generated from the database on 2026-10-01. Do not edit by hand: run
 `python scripts/write_coverage.py` instead, or the next run will
 overwrite whatever was written here.
 

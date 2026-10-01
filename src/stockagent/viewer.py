@@ -60,13 +60,31 @@ class ViewerData:
         return json.dumps(self.runs, indent=None, separators=(",", ":"))
 
 
+def _redact_strings(value):
+    """Mask figures in every string inside a nested structure."""
+    if isinstance(value, str):
+        return redact_figures(value)
+    if isinstance(value, dict):
+        return {key: _redact_strings(inner) for key, inner in value.items()}
+    if isinstance(value, list):
+        return [_redact_strings(inner) for inner in value]
+    return value
+
+
 def _redact_step(step: dict) -> dict:
     out = dict(step)
-    # Only tool results carry raw vendor figures. The model's own replies are
-    # masked too, since it quotes the figures back.
-    for field in ("result", "reply"):
+    # Tool results and model replies carry figures the model read back. So do a
+    # tool call's arguments: final_answer's "text" is the answer itself, which was
+    # a real leak the published-page test caught. Numeric fields such as
+    # latency_ms and token counts are left alone -- they are ours, not the
+    # provider's.
+    for field in ("result", "reply", "text", "thought"):
         if field in out:
             out[field] = redact_figures(str(out[field]))
+    if "arguments" in out:
+        out["arguments"] = _redact_strings(out["arguments"])
+    if "sources" in out:
+        out["sources"] = _redact_strings(out["sources"])
     return out
 
 

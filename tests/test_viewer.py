@@ -208,3 +208,41 @@ def test_a_graders_failure_detail_is_redacted_too():
 
     assert "[figure]" in redact_figures("expected 1068.7000 USD, closest was 1999.00 USD")
     assert "1068.7" not in redact_figures("expected 1068.7000 USD")
+
+
+def test_a_tool_calls_arguments_are_redacted_too(run_files, tmp_path):
+    # final_answer's "text" argument is the answer itself, figure and all. It was
+    # a real leak: result and reply were masked and arguments were not.
+    from stockagent.viewer import build_data
+
+    (run,) = build_data(run_files, redact=True).runs
+    (question,) = run["questions"]
+
+    import json as _json
+
+    blob = _json.dumps(question["steps"])
+    assert "1999.00" not in blob
+    assert "[figure]" in blob
+
+
+def test_redaction_reaches_nested_structures():
+    from stockagent.viewer import _redact_strings
+
+    nested = {"text": "closed at 102.00", "inner": [{"deep": "volume 1234567"}]}
+    masked = _redact_strings(nested)
+
+    assert masked["text"] == "closed at [figure]"
+    assert masked["inner"][0]["deep"] == "volume [figure]"
+
+
+def test_our_own_measurements_are_not_masked(run_files):
+    # Token counts and latency are ours, not the provider's, and masking them
+    # would throw away the cost figures the experiments depend on.
+    from stockagent.viewer import build_data
+
+    (run,) = build_data(run_files, redact=True).runs
+    (question,) = run["questions"]
+
+    assert isinstance(question["tokens"], int)
+    assert question["tokens"] > 0
+    assert all(isinstance(step["total_tokens"], int) for step in question["steps"])

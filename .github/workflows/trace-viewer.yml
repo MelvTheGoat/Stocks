@@ -1,0 +1,107 @@
+name: trace-viewer
+
+# Builds the trace viewer from whatever is on the results branch and publishes it
+# with GitHub Pages, which is free for public repositories.
+#
+# The page is built with redaction on, always. The traces contain raw prices and
+# the licence they come under forbids republishing them, so the published page
+# shows the shape of each run -- tools called, arguments, reasoning, citations --
+# with the figures masked. There is no flag here to turn that off, on purpose.
+#
+# Enable it once under Settings -> Pages -> Source -> GitHub Actions.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [results]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time, and a newer run wins rather than queueing behind a
+# stale one.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Fetch the results
+        run: |
+          git fetch origin results:results || echo "no results branch yet"
+          mkdir -p collected
+          if git rev-parse --verify results >/dev/null 2>&1; then
+            git archive results | tar -x -C collected
+          fi
+          find collected -name '*-results.json' -print || true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install
+        run: |
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Build the page
+        run: |
+          mkdir -p site
+          # Gather every results file into one directory, keeping each run's
+          # traces next to its results so the viewer can pair them up.
+          mkdir -p gathered
+          find collected -name '*-results.json' -exec cp {} gathered/ \; 2>/dev/null || true
+          find collected -name '*-traces.jsonl' -exec cp {} gathered/ \; 2>/dev/null || true
+          if ls gathered/*-results.json >/dev/null 2>&1; then
+            python scripts/build_trace_viewer.py --results gathered --out site/index.html
+          else
+            cat > site/index.html <<'HTML'
+          <!doctype html><html lang="en"><head><meta charset="utf-8">
+          <title>Agent traces</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>body{font:16px/1.6 system-ui,sans-serif;max-width:40rem;
+          margin:12vh auto;padding:0 1rem;color:#1a1a1a}
+          @media(prefers-color-scheme:dark){body{background:#161616;color:#e8e8e8}}
+          </style></head><body>
+          <h1>Agent traces</h1>
+          <p>No runs yet. This page fills in once an eval has run on Kaggle and
+          pushed its results.</p>
+          <p><a href="https://github.com/MelvTheGoat/Stocks">The repository</a></p>
+          </body></html>
+          HTML
+          fi
+
+      - name: Check nothing licensed leaked into the page
+        run: |
+          # Belt and braces on top of the redaction, because a leak here is a
+          # licence breach rather than a cosmetic bug.
+          if grep -oE '"result":"[^"]*[0-9]{2,}\.[0-9]{3,}' site/index.html; then
+            echo "::error::a raw figure reached the published page"
+            exit 1
+          fi
+          echo "clean"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

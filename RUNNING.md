@@ -48,6 +48,24 @@ use and not for redistribution, so `data/db/` is in `.gitignore`. See
 rebuilds an identical database with the command above, so every result stays
 reproducible.
 
+### Ask it something
+
+The database is the only hard requirement; the model can be anything that speaks
+the OpenAI chat API. Ollama is free, needs no GPU, and runs a 3B model on a CPU.
+
+```bash
+ollama serve                       # in one terminal
+ollama pull qwen2.5:3b-instruct
+
+python scripts/ask.py "What did AAPL close at on 2026-09-23?"
+python scripts/ask.py --steps "How did Apple do against the market in 2025?"
+python scripts/ask.py              # interactive, one question per line
+```
+
+A 3B model on a CPU takes a few seconds a step and will get some things wrong.
+That is the point of the evals: they put a number on how wrong. For better
+answers, run a 7B model on Kaggle and use `ask.py` inside the notebook.
+
 ### Freeze an eval version
 
 ```bash

@@ -63,7 +63,28 @@ no network, same output on any machine. It reads real saved market data, stores 
 queries it with SQL, catches a planted bad price by comparing two sources, and
 answers a question about a day the market was shut.
 
-Then, to run it for real: [RUNNING.md](RUNNING.md).
+## Actually using it
+
+Once the database exists, ask it questions:
+
+```bash
+# a model, free and with no GPU needed
+ollama serve
+ollama pull qwen2.5:3b-instruct
+
+python scripts/ask.py "What did AAPL close at on 2026-09-23?"
+python scripts/ask.py --steps "Did AAPL beat SPY in 2025?"
+python scripts/ask.py            # interactive
+```
+
+`--steps` shows which tools it called and why, how many tokens it spent, and how
+long it took.
+
+Any OpenAI-compatible endpoint works: `--endpoint` and `--model` point it
+elsewhere. Ollama is the default because it is free and runs a 3B model on a
+laptop CPU.
+
+Then, to run the evals for real: [RUNNING.md](RUNNING.md).
 
 ## How it fits together
 
@@ -73,7 +94,7 @@ runs/queue.yaml     the job list the Kaggle notebook works through
 data/eval/          frozen question sets (questions only, never answers)
 data/samples/       saved provider responses, used by the tests
 notebooks/          the Kaggle runner, pasted into one cell
-scripts/            collect, build the eval, run it, label, build the viewer
+scripts/            ask it a question, collect, build the eval, run it, label, view
 src/stockagent/
   config.py         run config, validated on load, unknown keys rejected
   llm/              model client: cache, retries, timeouts, call logging
